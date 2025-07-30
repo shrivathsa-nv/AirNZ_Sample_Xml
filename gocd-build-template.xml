@@ -1,0 +1,238 @@
+<pipeline name="k8s-api-build-css-template-v1">
+      <authorization>
+        <view>
+          <role>customer-shared-services-admin</role>
+        </view>
+        <admins>
+          <role>customer-shared-services-admin</role>
+        </admins>
+      </authorization>
+      <stage name="build">
+        <environmentvariables>
+          <variable name="JAVA_HOME">
+            <value>/usr/bin/java1.8</value>
+          </variable>
+          <variable name="AWS_DEFAULT_REGION">
+            <value>ap-southeast-2</value>
+          </variable>
+          <variable name="http_proxy">
+            <value>http://http.proxy.com:3128</value>
+          </variable>
+          <variable name="https_proxy">
+            <value>http://http.proxy.com:3128</value>
+          </variable>
+          <variable name="no_proxy">
+            <value>localhost,127.0.0.1,169.254.169.254</value>
+          </variable>
+          <variable name="SONAR_HOST_URL">
+            <value>http://sonarqube.example.com:9000</value>
+          </variable>
+        </environmentvariables>
+        <jobs>
+          <job name="build">
+            <tasks>
+              <exec command="/bin/bash">
+                <arg>-c</arg>
+                <arg>echo "&lt;meta http-equiv=\"refresh\" target=\"_blank\" content=\"1;url=${SONAR_HOST_URL}/dashboard?id=${GO_PIPELINE_NAME}\"\&gt;" &gt; sonar.html</arg>
+                <runif status="passed" />
+              </exec>
+              <exec command="/bin/bash">
+                <arg>-c</arg>
+                <arg>./gradlew clean sonar</arg>
+                <runif status="passed" />
+              </exec>
+              <exec command="/bin/bash">
+                <arg>-c</arg>
+                <arg>./ecr.sh login non-prod &amp;&amp; ./gradlew componentTest contractTestLatest --stacktrace</arg>
+                <runif status="passed" />
+                <oncancel>
+                  <exec command="/bin/bash">
+                    <arg>-c</arg>
+                    <arg>docker kill $(docker ps -a -q)</arg>
+                  </exec>
+                </oncancel>
+              </exec>
+              <exec command="/bin/bash">
+                <arg>-c</arg>
+                <arg>./ecr.sh push non-prod ${GO_PIPELINE_LABEL}</arg>
+                <runif status="passed" />
+              </exec>
+            </tasks>
+            <tabs>
+              <tab name="Sonar" path="sonar/sonar.html" />
+            </tabs>
+            <resources>
+              <resource>LARGE</resource>
+              <resource>LINUX</resource>
+            </resources>
+            <artifacts>
+              <artifact type="test" src="build/reports/*" dest="reports" />
+              <artifact type="test" src="build/test-results/**/*.xml" dest="testoutput" />
+              <artifact type="test" src="sonar.html" dest="sonar" />
+            </artifacts>
+          </job>
+        </jobs>
+      </stage>
+    </pipeline>
+    <pipeline name="k8s-api-build-css-template-java8">
+      <authorization>
+        <view>
+          <role>customer-shared-services-admin</role>
+        </view>
+        <admins>
+          <role>customer-shared-services-admin</role>
+        </admins>
+      </authorization>
+      <stage name="build">
+        <environmentvariables>
+          <variable name="JAVA_HOME">
+            <value>/usr/bin/java11</value>
+          </variable>
+          <variable name="AWS_DEFAULT_REGION">
+            <value>ap-southeast-2</value>
+          </variable>
+          <variable name="http_proxy">
+            <value>http://http.proxy.com:3128</value>
+          </variable>
+          <variable name="https_proxy">
+            <value>http://http.proxy.com:3128</value>
+          </variable>
+          <variable name="no_proxy">
+            <value>localhost,127.0.0.1,169.254.169.254</value>
+          </variable>
+          <variable name="SONAR_HOST_URL">
+            <value>http://sonarqube.example.com:9000</value>
+          </variable>
+        </environmentvariables>
+        <jobs>
+          <job name="build">
+            <tasks>
+              <exec command="/bin/bash">
+                <arg>-c</arg>
+                <arg>echo "&lt;meta http-equiv=\"refresh\" target=\"_blank\" content=\"1;url=${SONAR_HOST_URL}/dashboard?id=${GO_PIPELINE_NAME}\"\&gt;" &gt; sonar.html</arg>
+                <runif status="passed" />
+              </exec>
+              <exec command="/bin/bash">
+                <arg>-c</arg>
+                <arg>./gradlew clean sonar</arg>
+                <runif status="passed" />
+              </exec>
+              <exec command="/bin/bash">
+                <arg>-c</arg>
+                <arg>./ecr.sh login non-prod &amp;&amp; ./gradlew componentTest contractTestLatest --stacktrace</arg>
+                <runif status="passed" />
+                <oncancel>
+                  <exec command="/bin/bash">
+                    <arg>-c</arg>
+                    <arg>docker kill $(docker ps -a -q)</arg>
+                  </exec>
+                </oncancel>
+              </exec>
+              <exec command="/bin/bash">
+                <arg>-c</arg>
+                <arg>./ecr.sh push non-prod ${GO_PIPELINE_LABEL}</arg>
+                <runif status="passed" />
+              </exec>
+            </tasks>
+            <tabs>
+              <tab name="Sonar" path="sonar/sonar.html" />
+            </tabs>
+            <resources>
+              <resource>LARGE</resource>
+              <resource>LINUX</resource>
+            </resources>
+            <artifacts>
+              <artifact type="test" src="build/reports/*" dest="reports" />
+              <artifact type="test" src="build/test-results/**/*.xml" dest="testoutput" />
+              <artifact type="test" src="sonar.html" dest="sonar" />
+            </artifacts>
+          </job>
+        </jobs>
+      </stage>
+    </pipeline>
+    <pipeline name="k8s-api-build-css-template-java11">
+      <authorization>
+        <view>
+          <role>customer-shared-services-admin</role>
+        </view>
+        <admins>
+          <role>customer-shared-services-admin</role>
+        </admins>
+      </authorization>
+      <stage name="build">
+        <environmentvariables>
+          <variable name="JAVA_HOME">
+            <value>/usr/bin/java11</value>
+          </variable>
+          <variable name="AWS_DEFAULT_REGION">
+            <value>ap-southeast-2</value>
+          </variable>
+          <variable name="http_proxy">
+            <value>http://http.proxy.com:3128</value>
+          </variable>
+          <variable name="https_proxy">
+            <value>http://http.proxy.com:3128</value>
+          </variable>
+          <variable name="no_proxy">
+            <value>localhost,127.0.0.1,169.254.169.254</value>
+          </variable>
+          <variable name="SONAR_HOST_URL">
+            <value>http://sonarqube.example.com:9000</value>
+          </variable>
+        </environmentvariables>
+        <jobs>
+          <job name="build">
+            <tasks>
+              <exec command="/bin/bash">
+                <arg>-c</arg>
+                <arg>echo "&lt;meta http-equiv=\"refresh\" target=\"_blank\" content=\"1;url=${SONAR_HOST_URL}/dashboard?id=${GO_PIPELINE_NAME}\"\&gt;" &gt; sonar.html</arg>
+                <runif status="passed" />
+              </exec>
+              <exec command="/bin/bash">
+                <arg>-c</arg>
+                <arg>([[ $(docker ps -q | wc -l) -gt 0 ]] &amp;&amp; docker stop $(docker ps -q); [[ $(docker ps -a -q | wc -l) -gt 0 ]] &amp;&amp; docker rm $(docker ps -a -q)) || true</arg>
+                <runif status="passed" />
+              </exec>
+              <exec command="/bin/bash">
+                <arg>-c</arg>
+                <arg>./gradlew clean</arg>
+                <runif status="passed" />
+              </exec>
+              <exec command="/bin/bash">
+                <arg>-c</arg>
+                <arg>./gradlew sonar</arg>
+                <runif status="passed" />
+              </exec>
+              <exec command="/bin/bash">
+                <arg>-c</arg>
+                <arg>./ecr.sh login non-prod &amp;&amp; ./gradlew componentTest contractTestLatest --stacktrace</arg>
+                <runif status="passed" />
+                <oncancel>
+                  <exec command="/bin/bash">
+                    <arg>-c</arg>
+                    <arg>([[ $(docker ps -q | wc -l) -gt 0 ]] &amp;&amp; docker stop $(docker ps -q); [[ $(docker ps -a -q | wc -l) -gt 0 ]] &amp;&amp; docker rm $(docker ps -a -q)) || true</arg>
+                  </exec>
+                </oncancel>
+              </exec>
+              <exec command="/bin/bash">
+                <arg>-c</arg>
+                <arg>./ecr.sh push non-prod ${GO_PIPELINE_LABEL}</arg>
+                <runif status="passed" />
+              </exec>
+            </tasks>
+            <tabs>
+              <tab name="Sonar" path="sonar/sonar.html" />
+            </tabs>
+            <resources>
+              <resource>LARGE</resource>
+              <resource>LINUX</resource>
+            </resources>
+            <artifacts>
+              <artifact type="test" src="build/reports/*" dest="reports" />
+              <artifact type="test" src="build/test-results/**/*.xml" dest="testoutput" />
+              <artifact type="test" src="sonar.html" dest="sonar" />
+            </artifacts>
+          </job>
+        </jobs>
+      </stage>
+    </pipeline>
